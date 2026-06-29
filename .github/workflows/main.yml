@@ -45,6 +45,8 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
+      with:
+        node-version: 20
 
       # We need a separate step to expand matrix.os
       - name: Set Build Name
@@ -56,6 +58,7 @@ jobs:
           version: '6.8.2'
           modules: 'qtcharts'
           cache: 'true'
+          node-version: 20
 
       - name: Configure
         run: qmake -config release porymap.pro
