@@ -1335,15 +1335,35 @@ bool Project::saveMap(Map *map, bool skipLayout) {
 
         // Create file data/maps/<map_name>/scripts.inc
         QString text = this->getScriptDefaultString(projectConfig.usePoryScript, map->name());
-        saveTextFile(fullPath + "/scripts" + this->getScriptFileExtension(projectConfig.usePoryScript), text);
+		saveTextFile(fullPath + "/scripts" + this->getScriptFileExtension(projectConfig.usePoryScript), text);
+		saveTextFile(fullPath + "/scripts_en" + this->getScriptFileExtension(projectConfig.usePoryScript), text);
+		saveTextFile(fullPath + "/scripts_fr" + this->getScriptFileExtension(projectConfig.usePoryScript), text);
+		saveTextFile(fullPath + "/scripts_ge" + this->getScriptFileExtension(projectConfig.usePoryScript), text);
+		saveTextFile(fullPath + "/scripts_pt" + this->getScriptFileExtension(projectConfig.usePoryScript), text);
+		saveTextFile(fullPath + "/scripts_it" + this->getScriptFileExtension(projectConfig.usePoryScript), text);
 
         if (projectConfig.createMapTextFileEnabled) {
             // Create file data/maps/<map_name>/text.inc
             saveTextFile(fullPath + "/text" + this->getScriptFileExtension(projectConfig.usePoryScript), "\n");
         }
 
-        // Simply append to data/event_scripts.s.
-        text = QString("\n\t.include \"%1/scripts.inc\"\n").arg(folderPath);
+        // Simply append to data/event_scripts.s. Modificado kakarotto
+        		text = QString(
+				"\n"
+				"#if GAME_LANGUAGE == LANGUAGE_SPANISH\n"
+				"\t.include \"%1/scripts.inc\"\n"
+				"#elif GAME_LANGUAGE == LANGUAGE_ENGLISH\n"
+				"\t.include \"%1/scripts_en.inc\"\n"
+				"#elif GAME_LANGUAGE == LANGUAGE_GERMAN\n"
+				"\t.include \"%1/scripts_ge.inc\"\n"
+				"#elif GAME_LANGUAGE == LANGUAGE_FRENCH\n"
+				"\t.include \"%1/scripts_fr.inc\"\n"
+				"#elif GAME_LANGUAGE == LANGUAGE_KOREAN\n"
+				"\t.include \"%1/scripts_pt.inc\"\n"
+				"#elif GAME_LANGUAGE == LANGUAGE_ITALIAN\n"
+				"\t.include \"%1/scripts_it.inc\"\n"
+				"#endif\n"
+			).arg(folderPath);
         if (projectConfig.createMapTextFileEnabled) {
             text += QString("\t.include \"%1/text.inc\"\n").arg(folderPath);
         }
