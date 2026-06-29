@@ -20,8 +20,6 @@ jobs:
      matrix:
        qtversion: [5.14.2, 6.8.2]
     runs-on: ubuntu-latest
-    env:
-        ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
