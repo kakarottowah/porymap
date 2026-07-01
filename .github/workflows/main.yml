@@ -33,7 +33,7 @@ jobs:
           cache: 'true'
 
       - name: Configure
-        run: qmake -config release porymap.pro
+        run: qmake -config release CONFIG+=sdk_no_version_check QMAKE_CXXFLAGS+=-Wno-error=implicit-function-declaration porymap.pro
 
       - name: Compile
         run: make
