@@ -42,9 +42,8 @@ jobs:
       - name: Compile
         run: make
 
-    - name: Create Disk Image
-      run: macdeployqt porymap.app -dmg
-
+      - name: Create Disk Image
+        run: macdeployqt porymap.app
 
       - name: Prep Release Directory
         run: |
