@@ -21,6 +21,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      
+      - name: Remove AGL framework from Qt link flags
+        run: echo "QMAKE_LFLAGS -= -framework AGL" >> porymap.pro
 
       - name: Set Build Name
         run: echo "BUILD_NAME=porymap-${{ matrix.os }}" >> $GITHUB_ENV
