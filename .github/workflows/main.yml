@@ -42,13 +42,14 @@ jobs:
       - name: Compile
         run: make
 
-      - name: Create Disk Image
-        run: macdeployqt porymap.app -dmg
+    - name: Create Disk Image
+      run: macdeployqt porymap.app -dmg
+
 
       - name: Prep Release Directory
         run: |
           mkdir ${{ env.BUILD_NAME }}
-          cp porymap.dmg ${{ env.BUILD_NAME }}/porymap.dmg
+          cp -R porymap.app ${{ env.BUILD_NAME }}/porymap.app
           cp RELEASE-README.txt ${{ env.BUILD_NAME }}/README.txt
 
       - name: Bundle Release Directory
