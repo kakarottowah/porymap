@@ -32,6 +32,7 @@ jobs:
           modules: 'qtcharts'
           cache: 'true'
 
+      # FIX 1: Silenciar warning del SDK + FIX 2: evitar error de __yield()
       - name: Configure
         run: qmake -config release CONFIG+=sdk_no_version_check QMAKE_CXXFLAGS+=-Wno-error=implicit-function-declaration porymap.pro
 
@@ -50,9 +51,20 @@ jobs:
       - name: Bundle Release Directory
         run: zip -r ${{ env.BUILD_NAME }}.zip ${{ env.BUILD_NAME }}
 
+      # FIX 3: Crear tag automáticamente si no existe
+      - name: Create auto-tag if none exists
+        if: startsWith(github.ref, 'refs/heads/')
+        run: |
+          TAG="auto-$(date +%Y%m%d-%H%M%S)"
+          git tag $TAG
+          git push origin $TAG
+          echo "AUTO_TAG=$TAG" >> $GITHUB_ENV
+
+      # FIX 4: Release siempre, usando el tag automático si no hay uno real
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ env.AUTO_TAG }}
           files: ${{ env.BUILD_NAME }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
