@@ -21,6 +21,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      
+      - name: Remove AGL framework from Qt link flags
+        run: echo "QMAKE_LFLAGS -= -framework AGL" >> porymap.pro
 
       - name: Set Build Name
         run: echo "BUILD_NAME=porymap-${{ matrix.os }}" >> $GITHUB_ENV
@@ -32,34 +35,26 @@ jobs:
           modules: 'qtcharts'
           cache: 'true'
 
-      # 🔧 FIX AGL DEFINITIVO: eliminar AGL de todos los .pri internos de Qt (compatible con macOS)
-      - name: Remove AGL from Qt internal .pri files
-        run: |
-          for f in $(find $Qt6_DIR -type f -name "*.pri"); do
-            sed -i '' 's/-framework AGL//g' "$f"
-          done
-
-      # 🔧 FIX SDK + FIX __yield()
+      # FIX 1: Silenciar warning del SDK + FIX 2: evitar error de __yield()
       - name: Configure
         run: qmake -config release CONFIG+=sdk_no_version_check QMAKE_CXXFLAGS+=-Wno-error=implicit-function-declaration porymap.pro
 
       - name: Compile
         run: make
 
-      # 🔧 Crear solo el .app (sin .dmg)
-      - name: Deploy Qt frameworks into .app
-        run: macdeployqt porymap.app
+      - name: Create Disk Image
+        run: macdeployqt porymap.app -dmg
 
       - name: Prep Release Directory
         run: |
           mkdir ${{ env.BUILD_NAME }}
-          cp -R porymap.app ${{ env.BUILD_NAME }}/porymap.app
+          cp porymap.dmg ${{ env.BUILD_NAME }}/porymap.dmg
           cp RELEASE-README.txt ${{ env.BUILD_NAME }}/README.txt
 
       - name: Bundle Release Directory
         run: zip -r ${{ env.BUILD_NAME }}.zip ${{ env.BUILD_NAME }}
 
-      # 🔧 Crear tag automático si no existe
+      # FIX 3: Crear tag automáticamente si no existe
       - name: Create auto-tag if none exists
         if: startsWith(github.ref, 'refs/heads/')
         run: |
@@ -68,7 +63,7 @@ jobs:
           git push origin $TAG
           echo "AUTO_TAG=$TAG" >> $GITHUB_ENV
 
-      # 🔧 Release siempre, usando tag automático si no hay uno real
+      # FIX 4: Release siempre, usando el tag automático si no hay uno real
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
