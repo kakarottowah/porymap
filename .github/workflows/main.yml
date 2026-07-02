@@ -32,13 +32,10 @@ jobs:
           modules: 'qtcharts'
           cache: 'true'
 
-      # 🔧 FIX AGL DEFINITIVO: eliminar AGL de todos los módulos Qt
-      - name: Remove AGL from all Qt modules
+      # 🔧 FIX AGL DEFINITIVO: eliminar AGL de todos los .pri internos de Qt
+      - name: Remove AGL from Qt internal .pri files
         run: |
-          echo "QMAKE_LFLAGS -= -framework AGL" >> porymap.pro
-          echo "QMAKE_LIBS -= -framework AGL" >> porymap.pro
-          echo "QT -= opengl" >> porymap.pro
-          echo "QT -= openglwidgets" >> porymap.pro
+          find $Qt6_DIR -name "*.pri" -exec sed -i '' 's/-framework AGL//g' {} +
 
       # 🔧 FIX SDK + FIX __yield()
       - name: Configure
