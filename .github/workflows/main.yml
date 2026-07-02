@@ -21,9 +21,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Remove AGL framework from Qt link flags
-        run: echo "QMAKE_LFLAGS -= -framework AGL" >> porymap.pro
 
       - name: Set Build Name
         run: echo "BUILD_NAME=porymap-${{ matrix.os }}" >> $GITHUB_ENV
@@ -35,14 +32,23 @@ jobs:
           modules: 'qtcharts'
           cache: 'true'
 
-      # FIX 1: Silenciar warning del SDK + FIX 2: evitar error de __yield()
+      # 🔧 FIX AGL DEFINITIVO: eliminar AGL de todos los módulos Qt
+      - name: Remove AGL from all Qt modules
+        run: |
+          echo "QMAKE_LFLAGS -= -framework AGL" >> porymap.pro
+          echo "QMAKE_LIBS -= -framework AGL" >> porymap.pro
+          echo "QT -= opengl" >> porymap.pro
+          echo "QT -= openglwidgets" >> porymap.pro
+
+      # 🔧 FIX SDK + FIX __yield()
       - name: Configure
         run: qmake -config release CONFIG+=sdk_no_version_check QMAKE_CXXFLAGS+=-Wno-error=implicit-function-declaration porymap.pro
 
       - name: Compile
         run: make
 
-      - name: Create Disk Image
+      # 🔧 Crear solo el .app (sin .dmg)
+      - name: Deploy Qt frameworks into .app
         run: macdeployqt porymap.app
 
       - name: Prep Release Directory
@@ -54,7 +60,7 @@ jobs:
       - name: Bundle Release Directory
         run: zip -r ${{ env.BUILD_NAME }}.zip ${{ env.BUILD_NAME }}
 
-      # FIX 3: Crear tag automáticamente si no existe
+      # 🔧 Crear tag automático si no existe
       - name: Create auto-tag if none exists
         if: startsWith(github.ref, 'refs/heads/')
         run: |
@@ -63,7 +69,7 @@ jobs:
           git push origin $TAG
           echo "AUTO_TAG=$TAG" >> $GITHUB_ENV
 
-      # FIX 4: Release siempre, usando el tag automático si no hay uno real
+      # 🔧 Release siempre, usando tag automático si no hay uno real
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
